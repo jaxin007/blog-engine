@@ -1,0 +1,30 @@
+module.exports = {
+  env: {
+    es6: true,
+    node: true,
+  },
+  extends: [
+    'airbnb-base',
+    'eslint:recommended',
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  globals: {
+    Atomics: 'readonly',
+    SharedArrayBuffer: 'readonly',
+  },
+  parser: '@typescript-eslint/parser',
+  plugins: [
+    '@typescript-eslint',
+  ],
+  rules: {
+    indent: ['error', 2],
+    'linebreak-style': 'off',
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-inferrable-types': 'off',
+    camelcase: 'off',
+    'class-methods-use-this': 'off',
+    'no-console': 'off',
+    semi: ['error', 'always'],
+  },
+};
