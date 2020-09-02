@@ -7,7 +7,7 @@ const knex = require('knex');
 exports.up = function (knex) {
   return knex.schema.hasTable('users').then((exists) => {
     if (!exists) {
-      knex.schema.createTable('users', (table) => {
+      return knex.schema.createTable('users', (table) => {
         table.increments('id').primary();
         table.string('email', 100).unique().notNullable();
         table.string('name', 100).notNullable();
@@ -18,5 +18,5 @@ exports.up = function (knex) {
 };
 
 exports.down = function (knex) {
-  return knex.schema.dropTableIfExists('users');
+  return knex.schema.dropTable('users');
 };

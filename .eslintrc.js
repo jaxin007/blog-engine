@@ -23,8 +23,18 @@ module.exports = {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
     camelcase: 'off',
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off',
+    'import/prefer-default-export': 'off',
     'class-methods-use-this': 'off',
     'no-console': 'off',
     semi: ['error', 'always'],
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      },
+    },
   },
 };
