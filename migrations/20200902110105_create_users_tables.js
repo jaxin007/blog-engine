@@ -1,5 +1,5 @@
-/* eslint-disable no-shadow,consistent-return */
-import knex from 'knex';
+/* eslint-disable no-shadow,consistent-return,@typescript-eslint/no-var-requires */
+const knex = require('knex');
 
 /**
  * @param {knex} knex
@@ -7,7 +7,7 @@ import knex from 'knex';
 exports.up = function (knex) {
   return knex.schema.hasTable('users').then((exists) => {
     if (!exists) {
-      return knex.schema.createTableIfNotExists('users', (table) => {
+      knex.schema.createTable('users', (table) => {
         table.increments('id').primary();
         table.string('email', 100).unique().notNullable();
         table.string('name', 100).notNullable();
