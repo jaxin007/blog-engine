@@ -26,16 +26,24 @@
   },
   "homepage": "https://github.com/jaxin007/blog-engine#readme",
   "nodemonConfig": {
-    "watch": ["src"],
+    "watch": [
+      "src"
+    ],
     "ext": "ts,json",
-    "ignore": ["src/**/*.spec.ts"],
+    "ignore": [
+      "src/**/*.spec.ts"
+    ],
     "exec": "ts-node -r dotenv/config ./src/index.ts"
   },
   "dependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "fastest-validator": "^1.7.0",
     "knex": "^0.21.5",
     "nodemon": "^2.0.4",
     "pg": "^8.3.3",

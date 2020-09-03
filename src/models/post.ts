@@ -9,8 +9,3 @@ export interface UserPost extends Post {
   likes: number;
   comment: string;
 }
-
-export interface PostByUser {
-  body: string;
-  id: number;
-}

@@ -1,4 +1,6 @@
+import { authService } from './index';
 import { PostgresService } from './postgres.service';
+import { userSchema, validator } from './user.validator';
 import {
   User, NewUser, UserPost, Post,
 } from '../models';
@@ -22,11 +24,20 @@ export class UserService {
 
   async registerUser(user: NewUser): Promise<User> {
     const { name, email, password } = user;
+    const hashedPassword: string = await authService.hashPassword(password, 1);
+
+    const isValidatedUser = await validator
+      .validate(
+        { name, email, password: hashedPassword },
+        userSchema,
+      );
+
+    if (isValidatedUser !== true) throw isValidatedUser[0];
 
     const newUser = await this
       .postgresService
       .knex('users')
-      .insert({ email, name, password })
+      .insert({ email, name, password: hashedPassword })
       .returning('*');
 
     return newUser[0];
@@ -62,12 +73,43 @@ export class UserService {
     return postById[0];
   }
 
-  async getAllPosts(): Promise<UserPost[]> {
-    const allPosts = await this.postgresService
+  async getAllPosts(searchParams): Promise<UserPost[]> {
+    const postsResponse = await this.postgresService
       .knex('posts')
-      .select('*')
+      .orderBy('id')
+      .limit(searchParams.limit)
+      .offset(searchParams.offset);
+
+    return postsResponse;
+  }
+
+  async createComment(body: string, id: number): Promise<UserPost> {
+    const createdComment = await this.postgresService
+      .knex('posts')
+      .where('id', id)
+      .insert(body)
       .returning('*');
 
-    return allPosts;
+    return createdComment[0];
+  }
+
+  async likePost(id: number): Promise<UserPost> {
+    const likedPost = await this.postgresService
+      .knex('posts')
+      .where('id', id)
+      .increment('likes')
+      .returning('*');
+
+    return likedPost[0];
+  }
+
+  async dislikePost(id: number): Promise<User> {
+    const dislikedPost = await this.postgresService
+      .knex('posts')
+      .where('id', id)
+      .decrement('likes')
+      .returning('*');
+
+    return dislikedPost[0];
   }
 }
