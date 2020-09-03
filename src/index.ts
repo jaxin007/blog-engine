@@ -1,8 +1,9 @@
 import express, { Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import 'dotenv/config';
 import { userService } from './services';
-import { PostByUser } from './models';
+import { PostByUser, User, UserPost } from './models';
 
 const port = process.env.PORT || 3000;
 
@@ -19,8 +20,10 @@ app.use(
 );
 
 app.get('/users', async (req: Request, res: Response) => {
-  const allUsers = await userService.getAllUsers();
-  res.status(200).json({ allUsers });
+  await userService
+    .getAllUsers()
+    .then((users: User[]) => res.status(200).json({ users }))
+    .catch((err) => res.status(500).json({ errMessage: err.message }));
 });
 
 app.get('/post/:id', async (req: Request, res: Response) => {
@@ -28,8 +31,18 @@ app.get('/post/:id', async (req: Request, res: Response) => {
 
   await userService
     .getPostById(userId)
-    .then((post) => res.status(200).json(post))
+    .then((post: UserPost) => res.status(200).json(post))
     .catch((err) => res.status(500).json(err.details));
+});
+
+app.get('/posts', async (req: Request, res: Response) => {
+  await userService
+    .getAllPosts()
+    .then((posts) => res.status(200).json({ posts }))
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ errMessage: err });
+    });
 });
 
 app.post('/register', async (req: Request, res: Response) => {
@@ -37,16 +50,23 @@ app.post('/register', async (req: Request, res: Response) => {
 
   await userService
     .registerUser({ name, email, password })
-    .then((user) => res.status(200).json({ user }))
-    .catch((err) => res.status(500).json(err.detail));
+    .then((user: User) => res.status(200).json({ user }))
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ errMessage: err.message });
+    });
 });
 
 app.post('/post', async (req: Request, res: Response) => {
   const { body, id }: PostByUser = req.body;
 
-  const createdPost = await userService.createPost({ body, id });
-
-  return res.status(200).json({ createdPost });
+  await userService
+    .createPost({ body, id })
+    .then((createdPost: UserPost) => res.status(200).json({ createdPost }))
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ errMessage: err.message });
+    });
 });
 
 app.listen(port, () => {

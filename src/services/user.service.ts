@@ -7,8 +7,17 @@ export class UserService {
   /**
    * @param {PostgresService} postgresService
    */
-  constructor(private postgresService) {
+  constructor(private postgresService: PostgresService) {
     this.postgresService = postgresService;
+  }
+
+  async getUserById(id: number): Promise<User> {
+    const userById = this.postgresService
+      .knex<User>('users')
+      .where('id', id)
+      .first();
+
+    return userById;
   }
 
   async registerUser(user: NewUser): Promise<User> {
@@ -23,9 +32,10 @@ export class UserService {
     return newUser[0];
   }
 
-  async getAllUsers(): Promise<User> {
+  async getAllUsers(): Promise<User[]> {
     const allUsers = await this.postgresService
       .knex('users')
+      .select(['id', 'name', 'email'])
       .returning('*');
 
     return allUsers;
@@ -49,6 +59,15 @@ export class UserService {
       .first()
       .returning('*');
 
-    return postById;
+    return postById[0];
+  }
+
+  async getAllPosts(): Promise<UserPost[]> {
+    const allPosts = await this.postgresService
+      .knex('posts')
+      .select('*')
+      .returning('*');
+
+    return allPosts;
   }
 }
