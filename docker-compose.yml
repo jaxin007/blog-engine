@@ -1,8 +1,23 @@
 version: "3"
 
 services:
+  backend:
+    container_name: "blog-engine-backend"
+    build: .
+    volumes:
+      - ".:/app"
+      - "/app/node_modules"
+    ports:
+      - "3000:3000"
+    env_file: ".env"
+    environment:
+      - 'PGHOST=localhost'
+    depends_on:
+      - postgres
+
+
   postgres:
-    container_name: "blog-engine"
+    container_name: "blog-engine-postgres"
     image: "postgres:12"
     ports:
       - "3300:3300"
