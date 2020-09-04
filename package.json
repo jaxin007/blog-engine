@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p .",
     "start": "nodemon ./src/index.ts",
-    "docker:up": "docker-compose build backend && docker-compose up && npm run migrate:latest ",
+    "docker:init": "docker-compose build backend && npm run migrate:latest && docker-compose up",
     "docker:pg": "docker-compose up postgres && npm run migrate:latest",
     "docker:touch-pg": "docker exec -it blog-engine-postgres psql -U postgres",
     "docker:down": "docker-compose down",
