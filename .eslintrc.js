@@ -28,6 +28,7 @@ module.exports = {
     'import/prefer-default-export': 'off',
     'class-methods-use-this': 'off',
     'no-console': 'off',
+    'consistent-return': 'off',
     semi: ['error', 'always'],
   },
   settings: {

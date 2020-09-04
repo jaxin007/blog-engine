@@ -2,7 +2,7 @@ import { authService } from './index';
 import { PostgresService } from './postgres.service';
 import { userSchema, validator } from './user.validator';
 import {
-  User, NewUser, UserPost, Post,
+  User, NewUser, UserPost, Post, SearchParams,
 } from '../models';
 
 export class UserService {
@@ -14,12 +14,12 @@ export class UserService {
   }
 
   async getUserById(id: number): Promise<User> {
-    const userById = this.postgresService
-      .knex<User>('users')
+    const userById = await this.postgresService
+      .knex('users')
       .where('id', id)
-      .first();
+      .returning('*');
 
-    return userById;
+    return userById[0];
   }
 
   async registerUser(user: NewUser): Promise<User> {
@@ -73,12 +73,12 @@ export class UserService {
     return postById[0];
   }
 
-  async getAllPosts(searchParams): Promise<UserPost[]> {
+  async getAllPosts(searchParams: SearchParams): Promise<UserPost[]> {
     const postsResponse = await this.postgresService
       .knex('posts')
       .orderBy('id')
-      .limit(searchParams.limit)
-      .offset(searchParams.offset);
+      .limit(+searchParams.limit)
+      .offset(+searchParams.offset);
 
     return postsResponse;
   }
@@ -87,7 +87,7 @@ export class UserService {
     const createdComment = await this.postgresService
       .knex('posts')
       .where('id', id)
-      .insert(body)
+      .update({ body })
       .returning('*');
 
     return createdComment[0];

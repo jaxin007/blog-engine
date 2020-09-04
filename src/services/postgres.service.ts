@@ -3,7 +3,7 @@ import * as Knex from 'knex';
 export class PostgresService {
   readonly knex: Knex;
 
-  constructor(knex) {
+  constructor(knex: any) {
     this.knex = knex({
       client: 'pg',
       connection: {

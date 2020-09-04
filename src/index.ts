@@ -4,15 +4,27 @@ import express, {
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'dotenv/config';
-import { userService } from './services';
-import { Post, User, UserPost } from './models';
+import passport from 'passport';
+import { userService, authService } from './services';
+import { jwtStrategy } from './auth-config/strategy-config';
+import {
+  Comment,
+  NewUser,
+  Post,
+  SearchParams,
+  User,
+  UserPost,
+} from './models';
 
 const port = process.env.PORT || 3000;
 
+passport.use(jwtStrategy);
+
 const app = express();
 
-app.use(cors());
+app.use(passport.initialize());
 
+app.use(cors());
 app.use(bodyParser.json());
 
 app.use(
@@ -21,90 +33,123 @@ app.use(
   }),
 );
 
-app.get('/users', async (req: Request, res: Response) => {
-  await userService
-    .getAllUsers()
-    .then((users: User[]) => res.status(200).json({ users }))
-    .catch((err) => res.status(500).json(err));
+app.get('/users', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  try {
+    const allUsers: User[] = await userService.getAllUsers();
+
+    return res.status(200).json(allUsers);
+  } catch (e) {
+    console.error(e.message);
+    return res.status(500).json(e.message);
+  }
 });
 
-app.get('/post/:id', async (req: Request, res: Response) => {
-  const userId : number = +req.params.id;
+app.get('/post/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const postId : number = +req.params.id;
 
-  await userService
-    .getPostById(userId)
-    .then((post: UserPost) => res.status(200).json(post))
-    .catch((err) => res.status(500).json(err.details));
+  try {
+    const postById = await userService.getPostById(postId);
+
+    return res.status(200).json(postById);
+  } catch (e) {
+    console.error(e.message);
+    res.status(500).json(e.message);
+  }
 });
 
-app.get('/posts', async (req: Request, res: Response) => {
-  await userService
-    .getAllPosts(req.query)
-    .then((posts) => res.status(200).json({ posts }))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json({ errMessage: err });
-    });
+app.get('/posts', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  try {
+    const { limit, offset } = req.query;
+
+    const allPosts = await userService.getAllPosts({ limit, offset } as SearchParams);
+
+    return res.status(200).json(allPosts);
+  } catch (e) {
+    console.error(e.message);
+    return res.status(500).json(e.message);
+  }
 });
 
-app.post('/register', async (req: Request, res: Response) => {
-  const { email, name, password } = req.body;
+app.post('/signin', async (req: Request, res: Response) => {
+  const userData: User = req.body;
 
-  await userService
-    .registerUser({ name, email, password })
-    .then((user: User) => res.status(200).json({ user }))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json(err.message);
-    });
+  try {
+    const token = await authService.loginUser(userData);
+
+    return res.status(200).json({ token });
+  } catch (e) {
+    console.error(e.message);
+    return res.status(500).json(e.message);
+  }
 });
 
-app.post('/post', async (req: Request, res: Response) => {
+app.post('/signup', async (req: Request, res: Response) => {
+  const { email, name, password }: NewUser = req.body;
+
+  try {
+    await userService.registerUser({ name, email, password });
+
+    const token = authService.generateAccessToken();
+
+    return res.status(200).json({ token });
+  } catch (e) {
+    console.error(e.message);
+    return res.status(500).json(e.message);
+  }
+});
+
+app.post('/post', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
   const { body, id }: Post = req.body;
 
-  await userService
-    .createPost({ body, id })
-    .then((createdPost: UserPost) => res.status(200).json({ createdPost }))
-    .catch((err) => {
-      console.error(err.message);
-      return res.status(500).json(err.message);
-    });
+  try {
+    const newPost: UserPost = await userService.createPost({ body, id });
+
+    return res.status(200).json(newPost);
+  } catch (e) {
+    console.error(e.message);
+    return res.status(500).json(e.message);
+  }
 });
 
-app.post('/comment', async (req: Request, res: Response) => {
-  const { body, id } = req.body;
+app.post('/comment', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const { body, id }: Comment = req.body;
 
-  await userService
-    .createComment(body, id)
-    .then((comment) => res.status(200).json({ comment }))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json({ errMessage: err.message });
-    });
+  try {
+    const createdComment = await userService.createComment(body, id);
+
+    return res.status(200).json(createdComment);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json(e.message);
+  }
 });
 
 app.patch('/like/:id', async (req: Request, res: Response) => {
-  const id = +req.params.id;
+  const id: number = +req.params.id;
 
-  await userService
-    .likePost(id)
-    .then((likedPost) => res.status(200).json({ likedPost }))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json({ errMessage: err.message });
-    });
+  try {
+    const likedPost = await userService.likePost(id);
+
+    return res.status(200).json(likedPost);
+  } catch (e) {
+    console.error(e);
+
+    return res.status(500).json(e.message);
+  }
 });
 
-app.patch('/dislike/:id', async (req: Request, res: Response) => {
-  const id = +req.params.id;
+app.patch('/dislike/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const id: number = +req.params.id;
 
-  await userService
-    .dislikePost(id)
-    .then((dislikedPost) => res.status(200).json({ dislikedPost }))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json({ errMessage: err.message });
-    });
+  try {
+    const dislikedPost = await userService.dislikePost(id);
+
+    return res.status(200).json(dislikedPost);
+  } catch (e) {
+    console.error(e);
+
+    return res.status(500).json(e.message);
+  }
 });
 
 app.listen(port, () => {
