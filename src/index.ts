@@ -54,20 +54,22 @@ app.post('/signup', async (req: Request, res: Response) => {
   return res.status(200).json({ token });
 });
 
-app.get('/users', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.use(passport.authenticate('jwt', { session: false }));
+
+app.get('/users', async (req: Request, res: Response) => {
   const allUsers: User[] = await userService.getAllUsers();
 
   return res.status(200).json(allUsers);
 });
 
-app.get('/post/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.get('/post/:id', async (req: Request, res: Response) => {
   const postId : number = +req.params.id;
   const postById: Post = await userService.getPostById(postId);
 
   return res.status(200).json(postById);
 });
 
-app.get('/posts', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.get('/posts', async (req: Request, res: Response) => {
   const { limit, offset } = req.query;
 
   const allPosts: Post[] = await userService.getAllPosts({ limit, offset } as SearchParams);
@@ -75,14 +77,14 @@ app.get('/posts', passport.authenticate('jwt', { session: false }), async (req: 
   return res.status(200).json(allPosts);
 });
 
-app.post('/post', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.post('/post', async (req: Request, res: Response) => {
   const { body, id }: Post = req.body;
   const newPost: UserPost = await userService.createPost({ body, id });
 
   return res.status(200).json(newPost);
 });
 
-app.post('/comment', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.post('/comment', async (req: Request, res: Response) => {
   const { body, id } = req.body;
 
   const createdComment: Comment = await userService.createComment(body, id);
@@ -98,7 +100,7 @@ app.patch('/like/:id', async (req: Request, res: Response) => {
   return res.status(200).json(likedPost);
 });
 
-app.patch('/dislike/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+app.patch('/dislike/:id', async (req: Request, res: Response) => {
   const id: number = +req.params.id;
 
   const dislikedPost = await userService.dislikePost(id);
