@@ -1,4 +1,5 @@
 import express, {
+  NextFunction,
   Request, Response,
 } from 'express';
 import bodyParser from 'body-parser';
@@ -15,6 +16,8 @@ import {
   User,
   UserPost,
 } from './models';
+
+require('express-async-errors');
 
 const port = process.env.PORT || 3000;
 
@@ -33,123 +36,79 @@ app.use(
   }),
 );
 
-app.get('/users', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
-  try {
-    const allUsers: User[] = await userService.getAllUsers();
-
-    return res.status(200).json(allUsers);
-  } catch (e) {
-    console.error(e.message);
-    return res.status(500).json(e.message);
-  }
-});
-
-app.get('/post/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
-  const postId : number = +req.params.id;
-
-  try {
-    const postById = await userService.getPostById(postId);
-
-    return res.status(200).json(postById);
-  } catch (e) {
-    console.error(e.message);
-    res.status(500).json(e.message);
-  }
-});
-
-app.get('/posts', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
-  try {
-    const { limit, offset } = req.query;
-
-    const allPosts = await userService.getAllPosts({ limit, offset } as SearchParams);
-
-    return res.status(200).json(allPosts);
-  } catch (e) {
-    console.error(e.message);
-    return res.status(500).json(e.message);
-  }
-});
-
 app.post('/signin', async (req: Request, res: Response) => {
   const userData: User = req.body;
 
-  try {
-    const token = await authService.loginUser(userData);
+  const token = await authService.loginUser(userData);
 
-    return res.status(200).json({ token });
-  } catch (e) {
-    console.error(e.message);
-    return res.status(500).json(e.message);
-  }
+  return res.status(200).json({ token });
 });
 
 app.post('/signup', async (req: Request, res: Response) => {
   const { email, name, password }: NewUser = req.body;
 
-  try {
-    await userService.registerUser({ name, email, password });
+  await userService.registerUser({ name, email, password });
 
-    const token = authService.generateAccessToken();
+  const token = authService.generateAccessToken();
 
-    return res.status(200).json({ token });
-  } catch (e) {
-    console.error(e.message);
-    return res.status(500).json(e.message);
-  }
+  return res.status(200).json({ token });
+});
+
+app.get('/users', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const allUsers: User[] = await userService.getAllUsers();
+
+  return res.status(200).json(allUsers);
+});
+
+app.get('/post/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const postId : number = +req.params.id;
+  const postById: Post = await userService.getPostById(postId);
+
+  return res.status(200).json(postById);
+});
+
+app.get('/posts', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
+  const { limit, offset } = req.query;
+
+  const allPosts: Post[] = await userService.getAllPosts({ limit, offset } as SearchParams);
+
+  return res.status(200).json(allPosts);
 });
 
 app.post('/post', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
   const { body, id }: Post = req.body;
+  const newPost: UserPost = await userService.createPost({ body, id });
 
-  try {
-    const newPost: UserPost = await userService.createPost({ body, id });
-
-    return res.status(200).json(newPost);
-  } catch (e) {
-    console.error(e.message);
-    return res.status(500).json(e.message);
-  }
+  return res.status(200).json(newPost);
 });
 
 app.post('/comment', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
-  const { body, id }: Comment = req.body;
+  const { body, id } = req.body;
 
-  try {
-    const createdComment = await userService.createComment(body, id);
+  const createdComment: Comment = await userService.createComment(body, id);
 
-    return res.status(200).json(createdComment);
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json(e.message);
-  }
+  return res.status(200).json(createdComment);
 });
 
 app.patch('/like/:id', async (req: Request, res: Response) => {
   const id: number = +req.params.id;
 
-  try {
-    const likedPost = await userService.likePost(id);
+  const likedPost = await userService.likePost(id);
 
-    return res.status(200).json(likedPost);
-  } catch (e) {
-    console.error(e);
-
-    return res.status(500).json(e.message);
-  }
+  return res.status(200).json(likedPost);
 });
 
 app.patch('/dislike/:id', passport.authenticate('jwt', { session: false }), async (req: Request, res: Response) => {
   const id: number = +req.params.id;
 
-  try {
-    const dislikedPost = await userService.dislikePost(id);
+  const dislikedPost = await userService.dislikePost(id);
 
-    return res.status(200).json(dislikedPost);
-  } catch (e) {
-    console.error(e);
+  return res.status(200).json(dislikedPost);
+});
 
-    return res.status(500).json(e.message);
-  }
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log(err.message);
+  return res.status(500).json({ error: err.message });
 });
 
 app.listen(port, () => {

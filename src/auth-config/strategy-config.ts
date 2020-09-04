@@ -1,7 +1,4 @@
 import passportJWT from 'passport-jwt';
-import jwt from 'jsonwebtoken';
-import { authService, userService } from '../services';
-import { User } from '../models';
 import 'dotenv/config';
 
 const JwtStrategy = passportJWT.Strategy;
