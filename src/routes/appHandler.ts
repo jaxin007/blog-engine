@@ -32,7 +32,7 @@ export class AppHandler {
   }
 
   async getPostByIdHandler(req: Request, res: Response): ResponsePromise {
-    const postId : number = +req.params.id;
+    const postId: number = +req.params.id;
     const postById: Post = await userService.getPostById(postId);
 
     return res.status(200).json(postById);

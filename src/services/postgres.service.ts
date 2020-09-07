@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
 
 export class PostgresService {
-  readonly knex: Knex;
+  readonly knex: Knex
 
   constructor(knex: any) {
     this.knex = knex({
