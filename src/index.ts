@@ -1,21 +1,10 @@
-import express, {
-  NextFunction,
-  Request, Response,
-} from 'express';
+import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import 'dotenv/config';
 import passport from 'passport';
-import { userService, authService } from './services';
+import { appHandler } from './services';
 import { jwtStrategy } from './auth-config/strategy-config';
-import {
-  Comment,
-  NewUser,
-  Post,
-  SearchParams,
-  User,
-  UserPost,
-} from './models';
 
 require('express-async-errors');
 
@@ -36,82 +25,27 @@ app.use(
   }),
 );
 
-app.post('/signin', async (req: Request, res: Response) => {
-  const userData: User = req.body;
+app.post('/signin', appHandler.signInHandler);
 
-  const token = await authService.loginUser(userData);
-
-  return res.status(200).json({ token });
-});
-
-app.post('/signup', async (req: Request, res: Response) => {
-  const { email, name, password }: NewUser = req.body;
-
-  await userService.registerUser({ name, email, password });
-
-  const token = authService.generateAccessToken();
-
-  return res.status(200).json({ token });
-});
+app.post('/signup', appHandler.signUpHandler);
 
 app.use(passport.authenticate('jwt', { session: false }));
 
-app.get('/users', async (req: Request, res: Response) => {
-  const allUsers: User[] = await userService.getAllUsers();
+app.get('/users', appHandler.getAllUsersHandler);
 
-  return res.status(200).json(allUsers);
-});
+app.get('/post/:id', appHandler.getPostByIdHandler);
 
-app.get('/post/:id', async (req: Request, res: Response) => {
-  const postId : number = +req.params.id;
-  const postById: Post = await userService.getPostById(postId);
+app.get('/posts', appHandler.getAllPostsHandler);
 
-  return res.status(200).json(postById);
-});
+app.post('/post', appHandler.createPostHandler);
 
-app.get('/posts', async (req: Request, res: Response) => {
-  const { limit, offset } = req.query;
+app.post('/comment', appHandler.createCommentHandler);
 
-  const allPosts: Post[] = await userService.getAllPosts({ limit, offset } as SearchParams);
+app.patch('/like/:id', appHandler.likePostHandler);
 
-  return res.status(200).json(allPosts);
-});
+app.patch('/dislike/:id', appHandler.dislikePostHandler);
 
-app.post('/post', async (req: Request, res: Response) => {
-  const { body, id }: Post = req.body;
-  const newPost: UserPost = await userService.createPost({ body, id });
-
-  return res.status(200).json(newPost);
-});
-
-app.post('/comment', async (req: Request, res: Response) => {
-  const { body, id } = req.body;
-
-  const createdComment: Comment = await userService.createComment(body, id);
-
-  return res.status(200).json(createdComment);
-});
-
-app.patch('/like/:id', async (req: Request, res: Response) => {
-  const id: number = +req.params.id;
-
-  const likedPost = await userService.likePost(id);
-
-  return res.status(200).json(likedPost);
-});
-
-app.patch('/dislike/:id', async (req: Request, res: Response) => {
-  const id: number = +req.params.id;
-
-  const dislikedPost = await userService.dislikePost(id);
-
-  return res.status(200).json(dislikedPost);
-});
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.log(err.message);
-  return res.status(500).json({ error: err.message });
-});
+app.use(appHandler.errorHandler);
 
 app.listen(port, () => {
   console.log(`Server listened on port ${port}`);
