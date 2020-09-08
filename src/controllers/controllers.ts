@@ -2,43 +2,57 @@ import { NextFunction, Request, Response } from 'express';
 import {
   Comment, NewUser, Post, SearchParams, User, UserPost,
 } from '../models';
-import { authService, userService } from '../services';
+import { userService } from '../services';
+import { AuthService } from '../services/auth.service';
+import { config } from '../config/env-config';
+import { userSchema, validator } from '../services/user.validator';
 
-type ResponsePromise = Promise<Response>;
+export class Controllers {
+  static async validateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { name, email, password } = req.body;
 
-export class AppHandler {
-  async signInHandler(req: Request, res: Response): ResponsePromise {
+    const isValidatedUser = await validator
+      .validate(
+        { name, email, password },
+        userSchema,
+      );
+
+    if (isValidatedUser !== true) throw isValidatedUser[0];
+    next();
+  }
+
+  static async signInHandler(req: Request, res: Response): Promise<Response> {
     const userData: User = req.body;
 
-    const token = await authService.loginUser(userData);
+    const token = await AuthService.loginUser(userData);
 
     return res.status(200).json({ token });
   }
 
-  async signUpHandler(req: Request, res: Response): ResponsePromise {
+  static async signUpHandler(req: Request, res: Response): Promise<Response> {
     const { email, name, password }: NewUser = req.body;
 
     await userService.registerUser({ name, email, password });
 
-    const token = authService.generateAccessToken();
+    const token = AuthService.generateAccessToken(config.JWT_SECRET_KEY);
 
     return res.status(200).json({ token });
   }
 
-  async getAllUsersHandler(req: Request, res: Response): ResponsePromise {
+  static async getAllUsersHandler(req: Request, res: Response): Promise<Response> {
     const allUsers: User[] = await userService.getAllUsers();
 
     return res.status(200).json(allUsers);
   }
 
-  async getPostByIdHandler(req: Request, res: Response): ResponsePromise {
+  static async getPostByIdHandler(req: Request, res: Response): Promise<Response> {
     const postId: number = +req.params.id;
     const postById: Post = await userService.getPostById(postId);
 
     return res.status(200).json(postById);
   }
 
-  async getAllPostsHandler(req: Request, res: Response): ResponsePromise {
+  static async getAllPostsHandler(req: Request, res: Response): Promise<Response> {
     const { limit, offset } = req.query;
 
     const allPosts: Post[] = await userService.getAllPosts({ limit, offset } as SearchParams);
@@ -46,14 +60,14 @@ export class AppHandler {
     return res.status(200).json(allPosts);
   }
 
-  async createPostHandler(req: Request, res: Response): ResponsePromise {
+  static async createPostHandler(req: Request, res: Response): Promise<Response> {
     const { body, id }: Post = req.body;
     const newPost: UserPost = await userService.createPost({ body, id });
 
     return res.status(200).json(newPost);
   }
 
-  async createCommentHandler(req: Request, res: Response): ResponsePromise {
+  static async createCommentHandler(req: Request, res: Response): Promise<Response> {
     const { body, id } = req.body;
 
     const createdComment: Comment = await userService.createComment(body, id);
@@ -61,7 +75,7 @@ export class AppHandler {
     return res.status(200).json(createdComment);
   }
 
-  async likePostHandler(req: Request, res: Response): ResponsePromise {
+  static async likePostHandler(req: Request, res: Response): Promise<Response> {
     const id: number = +req.params.id;
 
     const likedPost = await userService.likePost(id);
@@ -69,7 +83,7 @@ export class AppHandler {
     return res.status(200).json(likedPost);
   }
 
-  async dislikePostHandler(req: Request, res: Response): ResponsePromise {
+  static async dislikePostHandler(req: Request, res: Response): Promise<Response> {
     const id: number = +req.params.id;
 
     const dislikedPost = await userService.dislikePost(id);
@@ -77,7 +91,9 @@ export class AppHandler {
     return res.status(200).json(dislikedPost);
   }
 
-  async errorHandler(err: Error, req: Request, res: Response, next: NextFunction): ResponsePromise {
+  static async errorHandler(
+    err: Error, req: Request, res: Response, next: NextFunction,
+  ): Promise<Response> {
     console.log(err.message);
     return res.status(500).json({ error: err.message });
   }
