@@ -20,6 +20,7 @@ module.exports = {
   rules: {
     indent: ['error', 2],
     'no-unused-vars': 'off',
+    'linebreak-style': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
     camelcase: 'off',
     'import/no-unresolved': 'off',

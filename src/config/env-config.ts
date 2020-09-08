@@ -9,7 +9,7 @@ export const config = {
   PGUSER: process.env.PGUSER || 'postgres',
   PGDATABASE: process.env.PGDATABASE || 'postgres',
   PGPASSWORD: process.env.PGPASSWORD || 'secret',
-  PGPORT: process.env.PGPORT || 3300,
+  PGPORT: Number.parseInt(process.env.PGPORT || '3300', 10),
 
-  PORT: process.env.PORT || 3000,
+  PORT: Number.parseInt(process.env.PORT || '3000', 10),
 };

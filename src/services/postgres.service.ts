@@ -1,10 +1,14 @@
-import * as Knex from 'knex';
+import knex from 'knex';
+import 'reflect-metadata';
+import { injectable } from 'inversify';
 import { config } from '../config/env-config';
+import { PostgresServiceInterface } from '../interfaces';
 
-export class PostgresService {
-  readonly knex: Knex
+@injectable()
+export class PostgresService implements PostgresServiceInterface {
+  public knex: any;
 
-  constructor(knex: any) {
+  constructor() {
     this.knex = knex({
       client: 'pg',
       connection: {
