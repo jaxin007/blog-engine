@@ -1,35 +1,33 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { config } from '../config/env-config';
 import { User } from '../models';
-import { authService, userService } from './index';
+import { userService } from './index';
 
 export class AuthService {
-  private readonly JwtSecretKey = process.env.JWT_SECRET_KEY || 'dff$asdcAs';
-
-  hashPassword(password: string, rounds: number): string {
+  static hashPassword(password: string, rounds: number): string {
     return bcrypt.hashSync(password, rounds);
   }
 
-  comparePasswords(requestPassword: string, userPassword: string): boolean {
+  static comparePasswords(requestPassword: string, userPassword: string): boolean {
     return bcrypt.compareSync(requestPassword, userPassword);
   }
 
-  generateAccessToken(): string {
-    const accessToken = jwt.sign({ payload: 'Authorized' }, this.JwtSecretKey, { expiresIn: '10m' });
+  static generateAccessToken(jwtSecretKey: string): string {
+    const accessToken = jwt.sign({ payload: 'Authorized' }, jwtSecretKey, { expiresIn: '10m' });
     return accessToken;
   }
 
-  async loginUser(userData: User) {
-    const { id, password } = userData;
+  static async loginUser(userData: User): Promise<string> {
+    const { email, password } = userData;
 
     try {
-      const userById = await userService.getUserById(id);
-      const checkedUser: boolean = await authService.comparePasswords(password, userById.password);
-      console.log(checkedUser);
+      const userById = await userService.getUserByData(email);
+      const checkedUser: boolean = await this.comparePasswords(password, userById.password);
       if (!checkedUser) {
         throw Error('Wrong password');
       }
-      const token: string = this.generateAccessToken();
+      const token: string = this.generateAccessToken(config.JWT_SECRET_KEY);
 
       return token;
     } catch (e) {

@@ -1,10 +1,10 @@
 import passportJWT from 'passport-jwt';
-import 'dotenv/config';
+import { config } from '../config/env-config';
 
 const JwtStrategy = passportJWT.Strategy;
 const { ExtractJwt } = passportJWT;
 
-const JwtSecretKey = process.env.JWT_SECRET_KEY || 'dff$asdcAs';
+const JwtSecretKey = config.JWT_SECRET_KEY;
 
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

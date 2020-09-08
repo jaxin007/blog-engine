@@ -1,9 +1,9 @@
-import { authService } from './index';
 import { PostgresService } from './postgres.service';
 import { userSchema, validator } from './user.validator';
 import {
   User, NewUser, UserPost, Post, SearchParams,
 } from '../models';
+import { AuthService } from './auth.service';
 
 export class UserService {
   /**
@@ -13,10 +13,10 @@ export class UserService {
     this.postgresService = postgresService;
   }
 
-  async getUserById(id: number): Promise<User> {
+  async getUserByData(email: string): Promise<User> {
     const userById = await this.postgresService
       .knex('users')
-      .where('id', id)
+      .where('email', email)
       .returning('*');
 
     return userById[0];
@@ -24,15 +24,7 @@ export class UserService {
 
   async registerUser(user: NewUser): Promise<User> {
     const { name, email, password } = user;
-    const hashedPassword: string = await authService.hashPassword(password, 1);
-
-    const isValidatedUser = await validator
-      .validate(
-        { name, email, password: hashedPassword },
-        userSchema,
-      );
-
-    if (isValidatedUser !== true) throw isValidatedUser[0];
+    const hashedPassword: string = await AuthService.hashPassword(password, 1);
 
     const newUser = await this
       .postgresService

@@ -19,7 +19,6 @@ module.exports = {
   ],
   rules: {
     indent: ['error', 2],
-    'linebreak-style': 'off',
     'no-unused-vars': 'off',
     '@typescript-eslint/no-inferrable-types': 'off',
     camelcase: 'off',
