@@ -1,17 +1,14 @@
-import { PostgresService } from './postgres.service';
-import { userSchema, validator } from './user.validator';
+import { inject, injectable } from 'inversify';
 import {
   User, NewUser, UserPost, Post, SearchParams,
 } from '../models';
+import { PostgresServiceInterface, UserServiceInterface } from '../interfaces';
+import { TYPES } from './types';
 import { AuthService } from './auth.service';
 
-export class UserService {
-  /**
-   * @param {PostgresService} postgresService
-   */
-  constructor(private postgresService: PostgresService) {
-    this.postgresService = postgresService;
-  }
+@injectable()
+export class UserService implements UserServiceInterface {
+  @inject(TYPES.PostgresService) private postgresService: PostgresServiceInterface;
 
   async getUserByData(email: string): Promise<User> {
     const userById = await this.postgresService

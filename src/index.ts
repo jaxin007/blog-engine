@@ -1,34 +1,17 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import passport from 'passport';
+import 'reflect-metadata';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import { container } from './inversify.config';
+import { configFn } from './config/configFn';
+import { errConfigFn } from './config/errorConfigFn';
 import { config } from './config/env-config';
-import { jwtStrategy } from './auth-config/strategy-config';
-import { authRouter, postsRouter } from './router';
-import { Controllers } from './controllers/controllers';
+// declare metadata by @controller annotation
+import './controllers/index';
 
-const port = config.PORT;
-
-passport.use(jwtStrategy);
-
-const app = express();
-
-app.use(passport.initialize());
-
-app.use(cors());
-app.use(bodyParser.json());
-
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  }),
-);
-
-app.use('/auth', authRouter);
-app.use('/posts', postsRouter);
-
-app.use(Controllers.errorHandler);
-
-app.listen(port, () => {
-  console.log(`Server listened on port ${port}`);
-});
+const server = new InversifyExpressServer(container);
+server
+  .setConfig(configFn)
+  .setErrorConfig(errConfigFn)
+  .build()
+  .listen(config.PORT, 'localhost', () => {
+    console.log(`server listened on port ${config.PORT}`);
+  });
