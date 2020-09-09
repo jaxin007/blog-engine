@@ -9,9 +9,9 @@ import {
   queryParam,
   response,
   requestParam,
-  requestBody, httpMethod,
+  requestBody,
 } from 'inversify-express-utils';
-import { inject, injectable } from 'inversify';
+import { inject } from 'inversify';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
 import { NewUser, User } from '../models';

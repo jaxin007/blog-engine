@@ -9,41 +9,19 @@ import {
   queryParam,
   response,
   requestParam,
-  requestBody, httpMethod,
+  requestBody,
+  httpMethod,
 } from 'inversify-express-utils';
-import { inject, injectable } from 'inversify';
+import { inject } from 'inversify';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
-import {
-  Comment,
-  Post, User, UserPost,
-} from '../models';
-import { userSchema, validator } from '../services/user.validator';
+import { Comment, Post, UserPost } from '../models';
 
 @controller('/posts')
 export class PostsController implements interfaces.Controller {
   @inject(TYPES.UserService) private userService: UserServiceInterface;
 
   @inject(TYPES.AuthService) private authService: AuthorizeServiceInterface;
-
-  private async validateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const { name, email, password } = req.body;
-    const isValidatedUser = await validator
-      .validate(
-        { name, email, password },
-        userSchema,
-      );
-
-    if (isValidatedUser !== true) throw isValidatedUser[0];
-    next();
-  }
-
-  @httpGet('/users')
-  private async getAllUsers(req: Request, res: Response): Promise<Response> {
-    const allUsers: User[] = await this.userService.getAllUsers();
-
-    return res.status(200).json(allUsers);
-  }
 
   @httpGet('/post/:id')
   private async getPostById(
@@ -67,16 +45,25 @@ export class PostsController implements interfaces.Controller {
   }
 
   @httpPost('/post')
-  private async createPost(req: Request, res: Response): Promise<Response> {
-    const { body, id }: Post = req.body;
+  private async createPost(
+    @requestBody() post: Post,
+      req: Request,
+      res: Response,
+  ): Promise<Response> {
+    const { body, id } = post;
+
     const newPost: UserPost = await this.userService.createPost({ body, id });
 
     return res.status(200).json(newPost);
   }
 
   @httpPost('/comment')
-  private async createComment(req: Request, res: Response): Promise<Response> {
-    const { body, id } = req.body;
+  private async createComment(
+    @requestBody() comment: Comment,
+      req: Request,
+      res: Response,
+  ): Promise<Response> {
+    const { body, id } = comment;
 
     const createdComment: Comment = await this.userService.createComment(body, id);
 
