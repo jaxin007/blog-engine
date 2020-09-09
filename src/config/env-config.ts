@@ -1,6 +1,7 @@
 import 'dotenv/config';
+import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
 
-export const config = {
+export const config: EnvConfigInterface = {
   JWT_SECRET_KEY: process.env.JWT_SECRET_KEY || 'dff$asdcAs',
 
   POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD || 'secret',

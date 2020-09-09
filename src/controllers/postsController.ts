@@ -1,4 +1,4 @@
-import { Response, Request, NextFunction } from 'express';
+import { Response, Request } from 'express';
 import {
   interfaces,
   controller,
@@ -11,17 +11,22 @@ import {
   requestParam,
   requestBody,
   httpMethod,
+  BaseHttpController,
 } from 'inversify-express-utils';
 import { inject } from 'inversify';
+import passport from 'passport';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
 import { Comment, Post, UserPost } from '../models';
+import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
 
-@controller('/posts')
-export class PostsController implements interfaces.Controller {
+@controller('/posts', passport.authenticate('jwt', { session: false }))
+export class PostsController extends BaseHttpController implements interfaces.Controller {
   @inject(TYPES.UserService) private userService: UserServiceInterface;
 
   @inject(TYPES.AuthService) private authService: AuthorizeServiceInterface;
+
+  @inject(TYPES.EnvConfig) private config: EnvConfigInterface
 
   @httpGet('/post/:id')
   private async getPostById(

@@ -10,12 +10,13 @@ import {
   response,
   requestParam,
   requestBody,
+  httpMethod,
 } from 'inversify-express-utils';
 import { inject } from 'inversify';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
 import { NewUser, User } from '../models';
-import { config } from '../config/env-config';
+import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
 
 @controller('/auth')
 export class AuthController implements interfaces.Controller {
@@ -23,13 +24,15 @@ export class AuthController implements interfaces.Controller {
 
   @inject(TYPES.AuthService) private authService: AuthorizeServiceInterface;
 
+  @inject(TYPES.EnvConfig) private config: EnvConfigInterface
+
   @httpPost('/signup')
   private async signUp(req: Request, res: Response): Promise<Response> {
     const { email, name, password }: NewUser = req.body;
 
     await this.userService.registerUser({ name, email, password });
 
-    const token = this.authService.generateAccessToken(config.JWT_SECRET_KEY);
+    const token = this.authService.generateAccessToken(this.config.JWT_SECRET_KEY);
 
     return res.status(200).json({ token });
   }
