@@ -42,11 +42,11 @@ export class UserService implements UserServiceInterface {
   }
 
   async createPost(post: Post): Promise<UserPost> {
-    const { body, id } = post;
+    const { body, author } = post;
 
     const createdPost = await this.postgresService
       .knex('posts')
-      .insert({ body, author: id })
+      .insert({ body, author })
       .returning('*');
 
     return createdPost[0];

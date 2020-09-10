@@ -8,10 +8,12 @@ import { config } from './config/env-config';
 import './controllers/index';
 
 const server = new InversifyExpressServer(container);
-server
+
+export const app = server
   .setConfig(configFn)
   .setErrorConfig(errConfigFn)
-  .build()
-  .listen(config.PORT, 'localhost', () => {
-    console.log(`server listened on port ${config.PORT}`);
-  });
+  .build();
+
+app.listen(config.PORT, 'localhost', () => {
+  console.log(`server listened on port ${config.PORT}`);
+});

@@ -20,7 +20,7 @@ import { User } from '../models';
 import { userSchema, validator } from '../services/user.validator';
 import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
 
-@controller('/users', passport.authenticate('jwt', { session: false }))
+@controller('/users')
 export class UsersController implements interfaces.Controller {
   @inject(TYPES.UserService) private userService: UserServiceInterface;
 

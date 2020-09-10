@@ -20,7 +20,7 @@ export class AuthService implements AuthorizeServiceInterface {
   }
 
   generateAccessToken(jwtSecretKey: string): string {
-    const accessToken = jwt.sign({ payload: 'Authorized' }, jwtSecretKey, { expiresIn: '10m' });
+    const accessToken = jwt.sign({ payload: 'Authorized' }, jwtSecretKey);
     return accessToken;
   }
 

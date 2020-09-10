@@ -27,7 +27,7 @@ export class AuthController implements interfaces.Controller {
   @inject(TYPES.EnvConfig) private config: EnvConfigInterface
 
   @httpPost('/signup')
-  private async signUp(req: Request, res: Response): Promise<Response> {
+  private async signUp(req: Request, res: Response) {
     const { email, name, password }: NewUser = req.body;
 
     await this.userService.registerUser({ name, email, password });

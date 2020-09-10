@@ -1,6 +1,6 @@
 export interface Post {
   body: string;
-  id: number;
+  author: number;
 }
 
 export interface UserPost extends Post {
