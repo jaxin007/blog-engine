@@ -1,5 +1,5 @@
 import { Response, Request } from 'express';
-import { interfaces, controller } from 'inversify-express-utils';
+import { interfaces, controller, httpPost } from 'inversify-express-utils';
 import { inject } from 'inversify';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';

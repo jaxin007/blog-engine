@@ -85,6 +85,14 @@ describe('/auth', () => {
       console.error(err.stack);
     }
   });
+
+  it('try to post something with with non-exists user data & should return status 401 (Unauthorized)', async () => {
+    try {
+      await TestService.checkAuthorization();
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
 });
 
 describe('/posts', () => {
@@ -128,7 +136,7 @@ describe('/posts', () => {
     }
   });
 
-  it('PATCH /like: should like a post', async () => {
+  it('PATCH /like/:id should like a post', async () => {
     try {
       const newUser = await TestService.createNewUser(user);
 
@@ -137,6 +145,20 @@ describe('/posts', () => {
       await TestService.createNewPost(post, token);
 
       await TestService.likePost(token);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
+
+  it('PATCH /dislike/:id should dislike a post', async () => {
+    try {
+      const newUser = await TestService.createNewUser(user);
+
+      const { token } = newUser.body;
+
+      await TestService.createNewPost(post, token);
+
+      await TestService.dislikePost(token);
     } catch (err) {
       console.error(err.stack);
     }

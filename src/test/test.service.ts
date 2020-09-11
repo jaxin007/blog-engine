@@ -26,6 +26,15 @@ export default class TestService {
     return authorizedUser;
   }
 
+  static async checkAuthorization(): Promise<any> {
+    const unauthorizedRequest = await chai.request(app)
+      .get('/users/users');
+
+    expect(unauthorizedRequest).status(401);
+
+    return unauthorizedRequest;
+  }
+
   static async createNewPost(post: Post, token: string): Promise<any> {
     const newPost = await chai.request(app)
       .post('/posts/post')
@@ -74,5 +83,21 @@ export default class TestService {
     expect(likedPost).to.be.a('object');
 
     return likedPost;
+  }
+
+  static async dislikePost(token: string): Promise<any> {
+    const dislikedPost = await chai.request(app)
+      .patch('/posts/dislike/1')
+      .set('authorization', `Bearer ${token}`);
+
+    const { body } = dislikedPost;
+
+    expect(dislikedPost).status(200);
+
+    expect(body).that.includes.all.keys(['id', 'body', 'author', 'created_at', 'comment', 'likes']);
+
+    expect(dislikedPost).to.be.a('object');
+
+    return dislikedPost;
   }
 }
