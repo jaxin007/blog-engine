@@ -122,6 +122,18 @@ describe('/posts', () => {
     }
   });
 
+  it('GET /posts: should get list of posts', async () => {
+    try {
+      const newUser = await TestService.createNewUser(user);
+
+      const { token } = newUser.body;
+
+      await TestService.getPostsList(token);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
+
   it('POST /comment: should create a new comment', async () => {
     try {
       const newUser = await TestService.createNewUser(user);
