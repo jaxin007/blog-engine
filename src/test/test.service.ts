@@ -52,6 +52,18 @@ export default class TestService {
     return newPost;
   }
 
+  static async getPostsList(token: string): Promise<any> {
+    const postsList = await chai.request(app)
+      .get('/posts/posts?limit=1&offset=1')
+      .set('authorization', `Bearer ${token}`);
+
+    expect(postsList).status(200);
+
+    expect(postsList).to.be.a('object');
+
+    return postsList;
+  }
+
   static async createNewComment(comment: Comment, token: string): Promise<any> {
     const newComment = await chai.request(app)
       .post('/posts/comment')
