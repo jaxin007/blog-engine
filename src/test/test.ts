@@ -7,9 +7,26 @@ import { cleanUpMetadata } from 'inversify-express-utils';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import knexCleaner from 'knex-cleaner';
-import { app } from '../index';
+import TestService from './test.service';
 import { config } from '../config/env-config';
 import { AuthService } from '../services/auth.service';
+import { Comment, NewUser, Post } from '../models';
+
+const user: NewUser = {
+  name: 'Kirill',
+  email: 'test@gmail.com',
+  password: 'testPassword',
+};
+
+const post: Post = {
+  author: 1,
+  body: 'test post text',
+};
+
+const comment: Comment = {
+  id: 1,
+  body: 'test comment',
+};
 
 chai.use(chaiHttp);
 
@@ -35,8 +52,8 @@ describe('AuthService', () => {
   });
 });
 
-describe('POST /auth', () => {
-  after(() => {
+describe('/auth', () => {
+  beforeEach((done: Done) => {
     knexCleaner.clean(knex({
       client: 'postgresql',
       connection: {
@@ -45,21 +62,83 @@ describe('POST /auth', () => {
         password: config.PGPASSWORD,
         database: config.PGDATABASE,
       },
-    }));
-    cleanUpMetadata();
+    })).then(() => {
+      cleanUpMetadata();
+      return done();
+    });
   });
 
-  it('should have status code 200 & register new user in DB & return jwt token', async () => {
+  it('POST /signup: should register new user in DB & return token', async () => {
     try {
-      const testResponse = await chai.request(app)
-        .post('/auth/signup')
-        .send({ name: 'Kirill', email: 'test@gmail.com', password: 'testPassword' });
+      await TestService.createNewUser(user);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
 
-      expect(testResponse).status(200);
+  it('POST /signin: should login user & return token', async () => {
+    try {
+      await TestService.createNewUser(user);
 
-      expect(testResponse.body).to.have.property('token');
-    } catch (e) {
-      console.error(e.stack);
+      await TestService.loginUser(user);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
+});
+
+describe('/posts', () => {
+  beforeEach((done: Done) => {
+    knexCleaner.clean(knex({
+      client: 'postgresql',
+      connection: {
+        host: config.PGHOST,
+        user: config.PGUSER,
+        password: config.PGPASSWORD,
+        database: config.PGDATABASE,
+      },
+    })).then(() => {
+      cleanUpMetadata();
+      return done();
+    });
+  });
+  it('POST /post: should create a new post', async () => {
+    try {
+      const newUser = await TestService.createNewUser(user);
+
+      const { token } = newUser.body;
+
+      await TestService.createNewPost(post, token);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
+
+  it('POST /comment: should create a new comment', async () => {
+    try {
+      const newUser = await TestService.createNewUser(user);
+
+      const { token } = newUser.body;
+
+      await TestService.createNewPost(post, token);
+
+      await TestService.createNewComment(comment, token);
+    } catch (err) {
+      console.error(err.stack);
+    }
+  });
+
+  it('PATCH /like: should like a post', async () => {
+    try {
+      const newUser = await TestService.createNewUser(user);
+
+      const { token } = newUser.body;
+
+      await TestService.createNewPost(post, token);
+
+      await TestService.likePost(token);
+    } catch (err) {
+      console.error(err.stack);
     }
   });
 });

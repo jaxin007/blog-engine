@@ -5,12 +5,9 @@ import {
   httpGet,
   httpPost,
   httpPatch,
-  request,
   queryParam,
-  response,
   requestParam,
   requestBody,
-  httpMethod,
   BaseHttpController,
 } from 'inversify-express-utils';
 import { inject } from 'inversify';

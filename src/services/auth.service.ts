@@ -26,7 +26,6 @@ export class AuthService implements AuthorizeServiceInterface {
 
   async loginUser(userData: User): Promise<string> {
     const { email, password } = userData;
-
     try {
       const userById = await this.userService.getUserByData(email);
       const checkedUser: boolean = AuthService.comparePasswords(password, userById.password);
