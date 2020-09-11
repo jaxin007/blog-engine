@@ -1,5 +1,5 @@
 import * as bodyParser from 'body-parser';
-import * as express from 'express';
+import express from 'express';
 import passport from 'passport';
 import { jwtStrategy } from './passport-config';
 

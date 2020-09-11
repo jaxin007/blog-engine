@@ -5,12 +5,9 @@ import {
   httpGet,
   httpPost,
   httpPatch,
-  request,
   queryParam,
-  response,
   requestParam,
   requestBody,
-  httpMethod,
   BaseHttpController,
 } from 'inversify-express-utils';
 import { inject } from 'inversify';
@@ -55,9 +52,9 @@ export class PostsController extends BaseHttpController implements interfaces.Co
       req: Request,
       res: Response,
   ): Promise<Response> {
-    const { body, id } = post;
+    const { body, author } = post;
 
-    const newPost: UserPost = await this.userService.createPost({ body, id });
+    const newPost: UserPost = await this.userService.createPost({ body, author });
 
     return res.status(200).json(newPost);
   }
@@ -70,7 +67,7 @@ export class PostsController extends BaseHttpController implements interfaces.Co
   ): Promise<Response> {
     const { body, id } = comment;
 
-    const createdComment: Comment = await this.userService.createComment(body, id);
+    const createdComment = await this.userService.createComment(body, id);
 
     return res.status(200).json(createdComment);
   }

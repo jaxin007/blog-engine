@@ -1,17 +1,5 @@
-import { Response, Request, NextFunction } from 'express';
-import {
-  interfaces,
-  controller,
-  httpGet,
-  httpPost,
-  httpPatch,
-  request,
-  queryParam,
-  response,
-  requestParam,
-  requestBody,
-  httpMethod,
-} from 'inversify-express-utils';
+import { Response, Request } from 'express';
+import { interfaces, controller, httpPost } from 'inversify-express-utils';
 import { inject } from 'inversify';
 import { TYPES } from '../services/types';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
@@ -27,7 +15,7 @@ export class AuthController implements interfaces.Controller {
   @inject(TYPES.EnvConfig) private config: EnvConfigInterface
 
   @httpPost('/signup')
-  private async signUp(req: Request, res: Response): Promise<Response> {
+  private async signUp(req: Request, res: Response) {
     const { email, name, password }: NewUser = req.body;
 
     await this.userService.registerUser({ name, email, password });
@@ -37,7 +25,7 @@ export class AuthController implements interfaces.Controller {
     return res.status(200).json({ token });
   }
 
-  @httpPost('signin')
+  @httpPost('/signin')
   private async signIn(req: Request, res: Response): Promise<Response> {
     const userData: User = req.body;
 

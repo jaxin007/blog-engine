@@ -20,13 +20,12 @@ export class AuthService implements AuthorizeServiceInterface {
   }
 
   generateAccessToken(jwtSecretKey: string): string {
-    const accessToken = jwt.sign({ payload: 'Authorized' }, jwtSecretKey, { expiresIn: '10m' });
+    const accessToken = jwt.sign({ payload: 'Authorized' }, jwtSecretKey);
     return accessToken;
   }
 
   async loginUser(userData: User): Promise<string> {
     const { email, password } = userData;
-
     try {
       const userById = await this.userService.getUserByData(email);
       const checkedUser: boolean = AuthService.comparePasswords(password, userById.password);

@@ -1,13 +1,13 @@
-import 'dotenv/config';
+import { config } from './src/config/env-config';
 
 module.exports = {
   development: {
     client: 'postgresql',
     connection: {
-      host: process.env.PGHOST,
-      user: process.env.PGUSER,
-      password: process.env.PGPASSWORD,
-      database: process.env.PGDATABASE,
+      host: config.PGHOST,
+      user: config.PGUSER,
+      password: config.PGPASSWORD,
+      database: config.PGDATABASE,
     },
     pool: {
       min: 2,
