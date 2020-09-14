@@ -1,16 +1,15 @@
 import 'reflect-metadata';
-import knex from 'knex';
 import chai, { expect } from 'chai';
 import chaiHttp from 'chai-http';
 import { describe, Done, it } from 'mocha';
 import { cleanUpMetadata } from 'inversify-express-utils';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import knexCleaner from 'knex-cleaner';
 import TestService from './test.service';
-import { config } from '../config/env-config';
+import { knexConfig } from '../config/knex-config';
 import { AuthService } from '../services/auth.service';
 import { Comment, NewUser, Post } from '../models';
+import KnexCleaner from './knexCleaner';
+
+const knexCleaner = new KnexCleaner(knexConfig);
 
 const user: NewUser = {
   name: 'Kirill',
@@ -54,18 +53,11 @@ describe('AuthService', () => {
 
 describe('/auth', () => {
   beforeEach((done: Done) => {
-    knexCleaner.clean(knex({
-      client: 'postgresql',
-      connection: {
-        host: config.PGHOST,
-        user: config.PGUSER,
-        password: config.PGPASSWORD,
-        database: config.PGDATABASE,
-      },
-    })).then(() => {
-      cleanUpMetadata();
-      return done();
-    });
+    knexCleaner.cleanDB()
+      .then(() => {
+        cleanUpMetadata();
+        return done();
+      });
   });
 
   it('POST /signup: should register new user in DB & return token', async () => {
@@ -97,19 +89,13 @@ describe('/auth', () => {
 
 describe('/posts', () => {
   beforeEach((done: Done) => {
-    knexCleaner.clean(knex({
-      client: 'postgresql',
-      connection: {
-        host: config.PGHOST,
-        user: config.PGUSER,
-        password: config.PGPASSWORD,
-        database: config.PGDATABASE,
-      },
-    })).then(() => {
-      cleanUpMetadata();
-      return done();
-    });
+    knexCleaner.cleanDB()
+      .then(() => {
+        cleanUpMetadata();
+        return done();
+      });
   });
+
   it('POST /post: should create a new post', async () => {
     try {
       const newUser = await TestService.createNewUser(user);

@@ -1,24 +1,14 @@
 import 'reflect-metadata';
 import knex from 'knex';
 import { injectable } from 'inversify';
-import { config } from '../config/env-config';
 import { PostgresServiceInterface } from '../interfaces';
+import { knexConfig } from '../config/knex-config';
 
 @injectable()
 export class PostgresService implements PostgresServiceInterface {
   public knex: knex;
 
   constructor() {
-    this.knex = knex({
-      client: 'pg',
-      connection: {
-        host: config.PGHOST,
-        user: config.PGUSER,
-        port: config.PGPORT,
-        password: config.PGPASSWORD,
-        database: config.PGDATABASE,
-      },
-      pool: { min: 0, max: 7 },
-    });
+    this.knex = knex(knexConfig);
   }
 }
