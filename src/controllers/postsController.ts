@@ -1,3 +1,4 @@
+import passport from 'passport';
 import { Response, Request } from 'express';
 import {
   interfaces,
@@ -11,11 +12,9 @@ import {
   BaseHttpController,
 } from 'inversify-express-utils';
 import { inject } from 'inversify';
-import passport from 'passport';
 import { TYPES } from '../services/types';
-import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
 import { Comment, Post, UserPost } from '../models';
-import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
+import { AuthorizeServiceInterface, UserServiceInterface, EnvConfigInterface } from '../interfaces';
 
 @controller('/posts', passport.authenticate('jwt', { session: false }))
 export class PostsController extends BaseHttpController implements interfaces.Controller {

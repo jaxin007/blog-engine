@@ -1,10 +1,10 @@
+import 'reflect-metadata';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
 import { config } from '../config/env-config';
 import { User } from '../models';
 import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
-import 'reflect-metadata';
 import { TYPES } from './types';
 
 @injectable()

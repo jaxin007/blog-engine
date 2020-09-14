@@ -2,9 +2,8 @@ import { Response, Request } from 'express';
 import { interfaces, controller, httpPost } from 'inversify-express-utils';
 import { inject } from 'inversify';
 import { TYPES } from '../services/types';
-import { AuthorizeServiceInterface, UserServiceInterface } from '../interfaces';
 import { NewUser, User } from '../models';
-import { EnvConfigInterface } from '../interfaces/EnvConfigInterface';
+import { AuthorizeServiceInterface, UserServiceInterface, EnvConfigInterface } from '../interfaces';
 
 @controller('/auth')
 export class AuthController implements interfaces.Controller {

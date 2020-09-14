@@ -1,12 +1,12 @@
-import knex from 'knex';
 import 'reflect-metadata';
+import knex from 'knex';
 import { injectable } from 'inversify';
 import { config } from '../config/env-config';
 import { PostgresServiceInterface } from '../interfaces';
 
 @injectable()
 export class PostgresService implements PostgresServiceInterface {
-  public knex: any;
+  public knex: knex;
 
   constructor() {
     this.knex = knex({
