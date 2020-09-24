@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.container = void 0;
+const inversify_1 = require("inversify");
+const types_1 = require("./services/types");
+const user_service_1 = require("./services/user.service");
+const postgres_service_1 = require("./services/postgres.service");
+const auth_service_1 = require("./services/auth.service");
+const env_config_1 = require("./config/env-config");
+exports.container = new inversify_1.Container();
+exports.container.bind(types_1.TYPES.AuthService).to(auth_service_1.AuthService);
+exports.container.bind(types_1.TYPES.UserService).to(user_service_1.UserService);
+exports.container.bind(types_1.TYPES.PostgresService).to(postgres_service_1.PostgresService);
+exports.container.bind(types_1.TYPES.EnvConfig).toConstantValue(env_config_1.config);
